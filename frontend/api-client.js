@@ -8,7 +8,7 @@
  */
 
 const API = (() => {
-  const BASE_URL   = 'http://localhost:8080';
+  const BASE_URL   = 'https://rental-bike-system-production.up.railway.app';
   const TOKEN_KEY  = 'brs_auth_token';
 
   /* ── Token helpers ─────────────────────────────────────── */
