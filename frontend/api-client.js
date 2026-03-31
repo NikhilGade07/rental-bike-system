@@ -51,17 +51,17 @@ const API = (() => {
       return res.data;
     },
 
-    /** POST /api/auth/logout (client-side only) */
+    
     logout() { clearToken(); },
 
-    /** GET /api/auth/users (admin) */
+    
     async getUsers() {
       const res = await request('GET', '/api/auth/users');
       return res.data;
     },
   };
 
-  /* ── Bike endpoints ─────────────────────────────────────── */
+ 
   const bikes = {
     /** GET /api/bikes?type=&available= */
     async getAll(params = {}) {
