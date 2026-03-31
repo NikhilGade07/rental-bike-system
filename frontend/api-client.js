@@ -29,7 +29,7 @@ const API = (() => {
     return json;     // { success, message, data }
   }
 
-  /* ── Auth endpoints ─────────────────────────────────────── */
+
   const auth = {
     /** POST /api/auth/register */
     async register(name, email, password, confirmPassword) {
