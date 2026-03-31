@@ -9,11 +9,7 @@ const API = (() => {
   function saveToken(token)  { localStorage.setItem(TOKEN_KEY, token); }
   function clearToken()      { localStorage.removeItem(TOKEN_KEY); }
 
-  /* ── Core fetch wrapper ────────────────────────────────── */
-  /**
-   * Makes an HTTP request to the Java backend.
-   * Returns parsed response data or throws on error.
-   */
+
   async function request(method, path, body = null) {
     const headers = { 'Content-Type': 'application/json' };
     const token   = getToken();
