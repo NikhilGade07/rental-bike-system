@@ -1,11 +1,4 @@
-/**
- * frontend/api-client.js
- * ─────────────────────────────────────────────────────────────
- * HTTP API Client
- * Calls the real Java Spring Boot backend at http://localhost:8080
- * Uses the native Fetch API (equivalent to Axios)
- * ─────────────────────────────────────────────────────────────
- */
+
 
 const API = (() => {
   const BASE_URL   = 'https://rental-bike-system-production.up.railway.app';
