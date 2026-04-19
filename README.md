@@ -49,11 +49,6 @@ A modern, premium bike rental platform built entirely with **HTML**, **CSS**, an
 
 3. **That's it!** No `npm install`, no database setup, no backend server needed.
 
-### Default Admin Credentials
-| Field    | Value                  |
-|----------|------------------------|
-| Email    | `admin@bikerental.com` |
-| Password | `admin123`             |
 
 ---
 
