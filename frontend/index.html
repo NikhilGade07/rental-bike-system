@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BikeRide – Online Bike Rental System</title>
+  <meta name="description"
+    content="Rent premium bikes online. Choose from mountain, road, city, and electric bikes. Easy booking, instant confirmation." />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" />
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+     TOAST CONTAINER
+══════════════════════════════════════════════════════════════ -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ══════════════════════════════════════════════════════════
+     BOOKING MODAL
+══════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h3 id="modal-title">Book a Bike</h3>
+        <button class="modal-close" id="modal-close" aria-label="Close modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="bike-detail-header">
+          <div class="bike-detail-image-wrap" style="width:120px;height:80px;border-radius:12px;overflow:hidden;background:#f5f5f5">
+             <img id="modal-bike-img" src="" alt="Bike" style="width:100%;height:100%;object-fit:cover" />
+          </div>
+          <div class="bike-detail-info">
+            <h3 id="modal-bike-name">Bike Name</h3>
+            <p id="modal-bike-type">Type</p>
+            <p class="bike-detail-price" id="modal-bike-price">₹0/hr</p>
+          </div>
+        </div>
+
+        <!-- Booking Form -->
+        <form id="form-booking" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="booking-start">Pick-up Date & Time</label>
+            <input type="datetime-local" class="form-control" id="booking-start" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="booking-end">Return Date & Time</label>
+            <input type="datetime-local" class="form-control" id="booking-end" required />
+          </div>
+
+          <!-- Cost Breakdown -->
+          <div class="cost-display">
+            <div class="cost-row">
+              <span><i class="fa-solid fa-tag" style="color:var(--primary-light);margin-right:6px"></i>Rate</span>
+              <span id="cost-rate" style="font-weight:600">₹0.00</span>
+            </div>
+            <div class="cost-row">
+              <span><i class="fa-solid fa-clock" style="color:var(--primary-light);margin-right:6px"></i>Duration</span>
+              <span id="cost-duration">0 hours</span>
+            </div>
+            <div class="cost-row total">
+              <span>Total Cost</span>
+              <span class="cost-amount" id="cost-total">₹0.00</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block mt-2" id="btn-confirm-booking">
+            <i class="fa-solid fa-check-circle"></i> Confirm Booking
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="#" class="nav-brand" data-nav="page-home">
+      <div class="brand-icon"><i class="fa-solid fa-bicycle"></i></div>
+      <span>BikeRide</span>
+    </a>
+
+    <div class="nav-links">
+      <!-- Guest buttons (shown when not logged in) -->
+      <div id="navbar-guest">
+        <button class="btn-nav-primary btn" id="btn-nav-login" data-page-link="page-auth">
+          <i class="fa-solid fa-right-to-bracket"></i> <span>Sign In</span>
+        </button>
+      </div>
+
+      <!-- User buttons (shown when logged in) -->
+      <div id="navbar-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" class="nav-links a" data-nav="page-home" data-page-link="page-home"
+          style="padding:7px 14px;border-radius:8px;color:var(--text-secondary);font-size:0.9rem;font-weight:500;transition:all .28s;display:flex;align-items:center;gap:6px">
+          <i class="fa-solid fa-house"></i><span>Home</span>
+        </a>
+        <a href="#" data-nav="page-bikes" data-page-link="page-bikes"
+          style="padding:7px 14px;border-radius:8px;color:var(--text-secondary);font-size:0.9rem;font-weight:500;transition:all .28s;display:flex;align-items:center;gap:6px">
+          <i class="fa-solid fa-bicycle"></i><span>Bikes</span>
+        </a>
+        <a href="#" data-nav="page-bookings" data-page-link="page-bookings"
+          style="padding:7px 14px;border-radius:8px;color:var(--text-secondary);font-size:0.9rem;font-weight:500;transition:all .28s;display:flex;align-items:center;gap:6px">
+          <i class="fa-solid fa-calendar-check"></i><span>My Bookings</span>
+        </a>
+        <a href="#" id="nav-admin-link" data-nav="page-admin" data-page-link="page-admin" class="hidden"
+          style="padding:7px 14px;border-radius:8px;color:var(--warning);font-size:0.9rem;font-weight:500;transition:all .28s;display:flex;align-items:center;gap:6px">
+          <i class="fa-solid fa-shield-halved"></i><span>Admin</span>
+        </a>
+        <a href="#" data-nav="page-profile" data-page-link="page-profile"
+          style="padding:7px 14px;border-radius:8px;color:var(--text-secondary);font-size:0.9rem;font-weight:500;transition:all .28s;display:flex;align-items:center;gap:6px">
+          <i class="fa-solid fa-user"></i><span>Profile</span>
+        </a>
+
+        <!-- User badge -->
+        <div class="nav-user-badge">
+          <div class="avatar" id="nav-user-avatar">?</div>
+          <span id="nav-user-name">User</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" data-action="logout">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════
+     PAGE: AUTH (Login / Register)
+══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-auth">
+    <div class="auth-container">
+      <div class="auth-logo">
+        <div class="logo-circle"><i class="fa-solid fa-bicycle"></i></div>
+        <h1>BikeRide</h1>
+        <p>Your premium bike rental platform</p>
+      </div>
+
+      <div class="auth-card">
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-form="form-login" id="tab-login">Sign In</button>
+          <button class="auth-tab" data-form="form-register" id="tab-register">Create Account</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form class="auth-form" id="form-login" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="login-email"><i class="fa-solid fa-envelope"></i> Email</label>
+            <input type="email" class="form-control" id="login-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+            <input type="password" class="form-control" id="login-password" placeholder="••••••••" required />
+          </div>
+
+
+          <button type="submit" class="btn btn-primary btn-block mt-2" id="btn-login">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
+          </button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form class="auth-form hidden" id="form-register" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="reg-name"><i class="fa-solid fa-user"></i> Full Name</label>
+            <input type="text" class="form-control" id="reg-name" placeholder="John Doe" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email"><i class="fa-solid fa-envelope"></i> Email</label>
+            <input type="email" class="form-control" id="reg-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password"><i class="fa-solid fa-lock"></i> Password</label>
+            <input type="password" class="form-control" id="reg-password" placeholder="Min. 6 characters" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-confirm"><i class="fa-solid fa-lock"></i> Confirm Password</label>
+            <input type="password" class="form-control" id="reg-confirm" placeholder="Repeat password" required />
+          </div>
+          <button type="submit" class="btn btn-accent btn-block mt-1" id="btn-register">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-home">
+    <section class="hero">
+      <div class="hero-badge">
+        <i class="fa-solid fa-star" style="color:var(--warning)"></i> Premium Bike Rental Experience
+      </div>
+      <h1>Ride Free,<br />Ride Smart</h1>
+      <p>Discover the best bikes in your city. Book in seconds, ride instantly. Mountain, road, city &amp; electric —
+        all at your fingertips.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" id="btn-browse-bikes">
+          <i class="fa-solid fa-bicycle"></i> Browse Bikes
+        </button>
+        <button class="btn btn-outline btn-lg" id="btn-go-bookings">
+          <i class="fa-solid fa-calendar-check"></i> My Bookings
+        </button>
+      </div>
+
+      <!-- Stats row -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-value" data-stat="total-bikes">0</div>
+          <div class="stat-label">Total Bikes</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" data-stat="avail-bikes">0</div>
+          <div class="stat-label">Available Now</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" data-stat="total-bookings">0</div>
+          <div class="stat-label">Total Bookings</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" data-stat="total-users">0</div>
+          <div class="stat-label">Happy Riders</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature cards -->
+    <section
+      style="padding:0 2rem 4rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;max-width:1100px;margin:0 auto">
+      <div class="card">
+        <div
+          style="width:44px;height:44px;background:rgba(108,99,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1rem">
+          <i class="fa-solid fa-bolt" style="color:var(--primary-light)"></i>
+        </div>
+        <h3 style="font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:6px">Instant Booking
+        </h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;line-height:1.6">Book any bike in under a minute. No
+          paperwork, no waiting.</p>
+      </div>
+      <div class="card">
+        <div
+          style="width:44px;height:44px;background:rgba(67,217,162,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1rem">
+          <i class="fa-solid fa-shield-halved" style="color:var(--success)"></i>
+        </div>
+        <h3 style="font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:6px">Safe & Insured
+        </h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;line-height:1.6">Every ride is covered. Helmets and
+          safety gear available.</p>
+      </div>
+      <div class="card">
+        <div
+          style="width:44px;height:44px;background:rgba(255,101,132,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1rem">
+          <i class="fa-solid fa-wallet" style="color:var(--accent)"></i>
+        </div>
+        <h3 style="font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:6px">Best Prices</h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;line-height:1.6">Flexible hourly and daily rates. Pay
+          only for what you use.</p>
+      </div>
+      <div class="card">
+        <div
+          style="width:44px;height:44px;background:rgba(255,190,118,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1rem">
+          <i class="fa-solid fa-leaf" style="color:var(--warning)"></i>
+        </div>
+        <h3 style="font-family:'Outfit',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:6px">Eco Friendly
+        </h3>
+        <p style="color:var(--text-secondary);font-size:0.875rem;line-height:1.6">Reduce your carbon footprint. Choose
+          electric or pedal bikes.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+     PAGE: BIKES
+══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-bikes">
+    <div class="page-header">
+      <div class="page-title">
+        <h2><i class="fa-solid fa-bicycle" style="color:var(--primary-light)"></i> Available Bikes</h2>
+        <p>Choose your perfect ride and book instantly</p>
+      </div>
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" class="form-control" id="bike-search" placeholder="Search bikes…" />
+        </div>
+        <select class="form-control" id="bike-filter" style="width:auto">
+          <option value="all">All Types</option>
+          <option value="Mountain">Mountain</option>
+          <option value="Road">Road</option>
+          <option value="City">City</option>
+          <option value="Electric">Electric</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="bikes-grid" id="bikes-grid">
+      <!-- Populated by JS -->
+      <div class="loader" style="grid-column:1/-1">
+        <div class="spinner"></div> Loading bikes…
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+     PAGE: MY BOOKINGS (History)
+══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-bookings">
+    <div class="page-header">
+      <div class="page-title">
+        <h2><i class="fa-solid fa-calendar-check" style="color:var(--primary-light)"></i> My Bookings</h2>
+        <p>Your complete rental history</p>
+      </div>
+      <button class="btn btn-primary" data-page-link="page-bikes">
+        <i class="fa-solid fa-plus"></i> New Booking
+      </button>
+    </div>
+
+    <!-- Empty state -->
+    <div id="bookings-empty" class="empty-state">
+      <div class="empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+      <h3>No bookings yet</h3>
+      <p>Browse our bikes and make your first booking!</p>
+      <button class="btn btn-primary mt-2" data-page-link="page-bikes">
+        <i class="fa-solid fa-bicycle"></i> Browse Bikes
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="bookings-table-wrap hidden" id="bookings-table-wrap">
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Bike</th>
+            <th>Duration</th>
+            <th>Cost</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bookings-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+     PAGE: PROFILE
+══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-profile">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div class="profile-info">
+        <h2 id="profile-name">Name</h2>
+        <p id="profile-email">email@example.com</p>
+        <span class="role-badge user" id="profile-role">User</span>
+      </div>
+    </div>
+
+    <div
+      style="padding:0 2rem 3rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem;max-width:900px">
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fa-solid fa-calendar-check" style="color:var(--primary)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="profile-bookings">0</div>
+          <div class="stat-desc">Total Bookings</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fa-solid fa-dollar-sign" style="color:var(--success)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="profile-spent">₹0</div>
+          <div class="stat-desc">Amount Spent</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow"><i class="fa-solid fa-bicycle" style="color:var(--warning)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="profile-active">0</div>
+          <div class="stat-desc">Active Rentals</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><i class="fa-regular fa-calendar" style="color:var(--accent)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" style="font-size:1rem" id="profile-joined">—</div>
+          <div class="stat-desc">Member Since</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:0 2rem 3rem">
+      <button class="btn btn-danger" data-action="logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+     PAGE: ADMIN DASHBOARD
+══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-admin">
+    <div class="page-header">
+      <div class="page-title">
+        <h2><i class="fa-solid fa-shield-halved" style="color:var(--warning)"></i> Admin Dashboard</h2>
+        <p>Manage your entire bike rental operation</p>
+      </div>
+    </div>
+
+    <!-- KPI Stats -->
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fa-solid fa-bicycle" style="color:var(--primary)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="adm-stat-bikes">0</div>
+          <div class="stat-desc">Total Bikes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fa-solid fa-circle-check" style="color:var(--success)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="adm-stat-avail">0</div>
+          <div class="stat-desc">Available</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow"><i class="fa-solid fa-calendar-check" style="color:var(--warning)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="adm-stat-bookings">0</div>
+          <div class="stat-desc">Total Bookings</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fa-solid fa-dollar-sign" style="color:var(--success)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="adm-stat-revenue">₹0</div>
+          <div class="stat-desc">Revenue</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red"><i class="fa-solid fa-hourglass-half" style="color:var(--accent)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="adm-stat-active">0</div>
+          <div class="stat-desc">Active Rentals</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class="fa-solid fa-users" style="color:var(--primary)"></i></div>
+        <div class="stat-info">
+          <div class="stat-num" id="adm-stat-users">0</div>
+          <div class="stat-desc">Users</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="admin-section">
+      <div style="margin-bottom:1.5rem">
+        <div class="tabs">
+          <button class="tab-btn admin-tab-btn active" data-tab="admin-tab-bikes">
+            <i class="fa-solid fa-bicycle"></i> Bikes
+          </button>
+          <button class="tab-btn admin-tab-btn" data-tab="admin-tab-bookings">
+            <i class="fa-solid fa-calendar"></i> Bookings
+          </button>
+          <button class="tab-btn admin-tab-btn" data-tab="admin-tab-users">
+            <i class="fa-solid fa-users"></i> Users
+          </button>
+        </div>
+      </div>
+
+      <!-- ── TAB: BIKES ── -->
+      <div class="admin-tab-pane active" id="admin-tab-bikes">
+
+        <!-- Add / Edit Bike Form -->
+        <div class="card" id="admin-bike-form-section" style="margin-bottom:1.5rem">
+          <div class="section-header">
+            <h3 class="section-title" id="admin-form-title">
+              <i class="fa-solid fa-plus-circle" style="color:var(--primary-light)"></i> Add New Bike
+            </h3>
+            <button class="btn btn-ghost btn-sm hidden" id="btn-cancel-bike-edit">
+              <i class="fa-solid fa-xmark"></i> Cancel Edit
+            </button>
+          </div>
+
+          <form id="form-admin-bike" novalidate>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="admin-bike-name">Bike Name</label>
+                <input type="text" class="form-control" id="admin-bike-name" placeholder="e.g. TrailX Pro" required />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="admin-bike-type">Type</label>
+                <select class="form-control" id="admin-bike-type" required>
+                  <option value="Mountain">Mountain</option>
+                  <option value="Road">Road</option>
+                  <option value="City">City</option>
+                  <option value="Electric">Electric</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="admin-bike-price">Price / Hour (₹)</label>
+                <input type="number" class="form-control" id="admin-bike-price" min="0.5" step="0.5"
+                  placeholder="e.g. 500" required />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="admin-bike-image">Image URL (Optional)</label>
+                <input type="text" class="form-control" id="admin-bike-image"
+                  placeholder="https://example.com/bike.jpg" />
+              </div>
+            </div>
+            <div class="form-group mt-2">
+              <label class="form-label" for="admin-bike-features">Features</label>
+              <input type="text" class="form-control" id="admin-bike-features"
+                placeholder="Helmet, GPS, Lock (comma-separated)" />
+            </div>
+            <div class="mt-1">
+              <button type="submit" class="btn btn-primary" id="btn-admin-save-bike">
+                <i class="fa-solid fa-floppy-disk"></i> Save Bike
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Bikes Table -->
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="section-header" style="padding:1.25rem 1.25rem 0">
+            <h3 class="section-title"><i class="fa-solid fa-list"></i> Fleet Overview</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="bookings-table" style="margin-top:1rem">
+              <thead>
+                <tr>
+                  <th>Bike</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-bikes-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: BOOKINGS ── -->
+      <div class="admin-tab-pane" id="admin-tab-bookings">
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="section-header" style="padding:1.25rem 1.25rem 0">
+            <h3 class="section-title"><i class="fa-solid fa-calendar-check"></i> All Bookings</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="bookings-table" style="margin-top:1rem">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>User</th>
+                  <th>Bike</th>
+                  <th>Duration</th>
+                  <th>Cost</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-bookings-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: USERS ── -->
+      <div class="admin-tab-pane" id="admin-tab-users">
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="section-header" style="padding:1.25rem 1.25rem 0">
+            <h3 class="section-title"><i class="fa-solid fa-users"></i> Registered Users</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="bookings-table" style="margin-top:1rem">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Bookings</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+     APP SCRIPT — Self-contained, localStorage-powered
+     No backend dependency required
+═══════════════════════════════════════════════════════ -->
+  <script src="script.js"></script>
+</body>
+
+</html>

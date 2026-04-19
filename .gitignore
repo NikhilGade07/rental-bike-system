@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# IDE files
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
