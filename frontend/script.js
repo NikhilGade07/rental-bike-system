@@ -7,7 +7,7 @@
 
 'use strict';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://rental-bike-system-production.up.railway.app/api';
 
 /* ═══════════════════════════════════════════════════════════════
    SESSION MANAGER
